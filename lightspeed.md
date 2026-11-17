@@ -17,7 +17,51 @@ oc auth can-i create namespaces --as=system:serviceaccount:kubernetes-mcp-server
 
 `````````
 
-# create secret and cm
+# create cert and cm
+```
+# 1st cert
+openssl s_client -showcerts -servername models.corp.redhat.com -connect models.corp.redhat.com:443 </dev/null 2>/dev/null   | sed -n '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p' > /tmp/full.crt
+
+# 2nd cert
+python3 - <<'EOF'
+import subprocess, glob, re
+
+files = glob.glob("/etc/pki/ca-trust/source/anchors/*") + ["/etc/pki/tls/certs/ca-bundle.crt"]
+found = []
+for f in files:
+    try:
+        text = open(f).read()
+    except Exception:
+        continue
+    for pem in re.findall(r"-----BEGIN CERTIFICATE-----.*?-----END CERTIFICATE-----", text, re.S):
+        out = subprocess.check_output(["openssl", "x509", "-noout", "-subject", "-issuer"], input=pem.encode()).decode()
+        if "2023 Certificate Authority RHCSv2" in out or "Red Hat" in out:
+            print("Found in", f, ":\n", out.strip())
+            found.append(pem)
+
+open("/tmp/rh-root.pem", "w").write("\n".join(dict.fromkeys(found)) + "\n")
+EOF
+
+# join cert
+cat full.crt > join.pem
+cat rh-root.pem >> join.pem
+
+
+# test the cert
+openssl crl2pkcs7 -nocrl -certfile join.pem | openssl pkcs7 -print_certs -text -noout | grep -E 'Subject:|Issuer:'|sort|uniq
+        Issuer: CN=Internal Root CA/emailAddress=xxxxxxxc@xxxxxxxx
+        Issuer:  Certificate Authority 
+        Subject: Internal Root CA/emailAddress=xxxxxxxxx@xxxxxxx
+        Subject: 
+        Subject: 3 Certificate Authority 
+
+
+# create cm 
+oc create configmap redhat-it-ca   --from-file=ca-bundle.crt=/tmp/join.pem   -n openshift-lightspeed
+
+```
+
+# create secret
 ```
 oc create secret generic credentials  --from-literal=apitoken="xxxxxxxxxx"  -n openshift-lightspeed
 

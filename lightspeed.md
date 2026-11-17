@@ -8,18 +8,19 @@ helm upgrade -i -n kubernetes-mcp-server --create-namespace kubernetes-mcp-serve
   --set ingress.host=kubernetes-mcp-server.apps.hub.5g-deployment.lab \
   --set 'config.toolsets={core,config,helm,kubevirt}'
 ```
-oc patch olsconfig cluster --type='merge' -p '{"spec":{"mcpServers":[{"name":"kubernetes-mcp-server","timeout":30,"url":"http://kubernetes-mcp-server.kubernetes-mcp-server.svc.cluster.local:8080/mcp"}]}}'
+
 
 ```
+oc adm policy add-cluster-role-to-user admin  system:serviceaccount:openshift-lightspeed:lightspeed-service-api
 oc adm policy add-cluster-role-to-user cluster-admin -z kubernetes-mcp-server -n kubernetes-mcp-server
-
 oc auth can-i create namespaces --as=system:serviceaccount:kubernetes-mcp-server:kubernetes-mcp-server
 
 `````````
 
 
 
-
+# OLSconfig
+```
 apiVersion: ols.openshift.io/v1alpha1
 kind: OLSConfig
 metadata:
@@ -68,5 +69,5 @@ spec:
     guardrails:
       toolResultInspection:
         enabled: false
-``````````````````
+````
 

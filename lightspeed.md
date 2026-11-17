@@ -10,12 +10,16 @@ helm upgrade -i -n kubernetes-mcp-server --create-namespace kubernetes-mcp-serve
 ```
 oc patch olsconfig cluster --type='merge' -p '{"spec":{"mcpServers":[{"name":"kubernetes-mcp-server","timeout":30,"url":"http://kubernetes-mcp-server.kubernetes-mcp-server.svc.cluster.local:8080/mcp"}]}}'
 
-
+```
 oc adm policy add-cluster-role-to-user cluster-admin -z kubernetes-mcp-server -n kubernetes-mcp-server
 
 oc auth can-i create namespaces --as=system:serviceaccount:kubernetes-mcp-server:kubernetes-mcp-server
 
 `````````
+
+
+
+
 apiVersion: ols.openshift.io/v1alpha1
 kind: OLSConfig
 metadata:

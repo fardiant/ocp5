@@ -17,7 +17,11 @@ oc auth can-i create namespaces --as=system:serviceaccount:kubernetes-mcp-server
 
 `````````
 
+# create secret and cm
+```
+oc create secret generic credentials  --from-literal=apitoken="xxxxxxxxxx"  -n openshift-lightspeed
 
+```
 
 # OLSconfig
 ```

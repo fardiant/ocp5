@@ -1,3 +1,9 @@
+# doc
+```
+https://docs.google.com/document/d/1JEH4WHQwmLxtmt0TSo1w82SiBqKmRamRx1f6nHui24M/edit?tab=t.5a138yhxuqcy
+[https://docs.google.com/document/d/1JEH4WHQwmLxtmt0TSo1w82SiBqKmRamRx1f6nHui24M/edit?tab=t.5a138yhxuqcy](https://docs.google.com/document/d/1LoW-jRjN69Ypj_55QYKY1sfiQOP9DmszKgrXYsXr4E8/edit?tab=t.0#heading=h.32uxpyazbo5c)
+https://github.com/containers/kubernetes-mcp-server
+```
 # MCP deployment
 ```
 curl -fsSL https://get.helm.sh/helm-v3.17.3-linux-amd64.tar.gz -o /tmp/helm.tar.gz && tar -xzf /tmp/helm.tar.gz -C /tmp && mv /tmp/linux-amd64/helm /usr/local/bin/helm && rm -rf /tmp/helm.tar.gz /tmp/linux-amd64

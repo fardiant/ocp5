@@ -13,6 +13,8 @@ helm upgrade -i -n kubernetes-mcp-server --create-namespace kubernetes-mcp-serve
   --set openshift=true \
   --set ingress.host=kubernetes-mcp-server.apps.hub.5g-deployment.lab \
   --set 'config.toolsets={core,config,helm,kubevirt}'
+
+helm list -A
 ```
 
 

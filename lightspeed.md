@@ -29,6 +29,106 @@ oc auth can-i create namespaces --as=system:serviceaccount:kubernetes-mcp-server
 
 `````````
 
+# Github MCP
+```
+# secret
+oc create secret generic github-mcp-token --from-literal=header="xxxxxxxxxxxxxxx" -n openshift-lightspeed
+
+# deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: github-mcp-server
+  namespace: git-mcp
+  labels:
+    app.kubernetes.io/name: github-mcp-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: github-mcp-server
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: github-mcp-server
+    spec:
+      containers:
+        - name: github-mcp-server
+          image: ghcr.io/github/github-mcp-server:latest
+          args:
+            - http
+          ports:
+            - name: http
+              containerPort: 8082
+              protocol: TCP
+          env:
+            - name: GITHUB_PERSONAL_ACCESS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: github-mcp-pat
+                  key: GITHUB_PERSONAL_ACCESS_TOKEN
+            - name: GITHUB_READ_ONLY
+              value: "1"
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            capabilities:
+              drop:
+                - ALL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: github-mcp-server
+  namespace: git-mcp
+  labels:
+    app.kubernetes.io/name: github-mcp-server
+spec:
+  selector:
+    app.kubernetes.io/name: github-mcp-server
+  ports:
+    - name: http
+      port: 8082
+      targetPort: http
+      protocol: TCP
+  type: ClusterIP
+
+# OLSconfig
+kind: OLSConfig
+metadata:
+  name: cluster
+spec:
+  featureGates:
+    - MCPServer
+  mcpServers:
+    - name: github-mcp-server
+      url: http://github-mcp-server.git-mcp.svc.cluster.local:8082
+      timeout: 30
+      headers:
+        - name: Authorization
+          valueFrom:
+            type: secret
+            secretRef:
+              name: github-mcp-token
+```
 # create cert and cm
 ```
 # 1st cert

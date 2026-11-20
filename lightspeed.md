@@ -269,6 +269,7 @@ EOF
 ```
 
 ```
+oc apply -f - <<'EOF'
 apiVersion: agentic.openshift.io/v1alpha1
 kind: LLMProvider
 metadata:
@@ -289,4 +290,5 @@ spec:
     name: corp-vllm
   model: Qwen3.8-27B-FP8
   maxTurns: 200
+EOF
 ```

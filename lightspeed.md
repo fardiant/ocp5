@@ -231,3 +231,62 @@ spec:
         enabled: false
 ````
 
+# Agentic run
+```
+TOKEN=$(oc get secret credentials -n openshift-lightspeed -o jsonpath='{.data.apitoken}' | base64 -d)
+oc patch secret credentials -n openshift-lightspeed --type=merge -p "{\"stringData\":{\"OPENAI_API_KEY\":\"${TOKEN}\"}}"
+```
+
+```
+oc apply -f - <<'EOF'
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: lightspeed-agent-cluster-reader
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-reader
+subjects:
+- kind: ServiceAccount
+  name: lightspeed-agent
+  namespace: openshift-lightspeed
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: lightspeed-agent-monitoring-view
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-monitoring-view
+subjects:
+- kind: ServiceAccount
+  name: lightspeed-agent
+  namespace: openshift-lightspeed
+EOF
+
+```
+
+```
+apiVersion: agentic.openshift.io/v1alpha1
+kind: LLMProvider
+metadata:
+  name: corp-vllm
+spec:
+  type: OpenAI
+  openAI:
+    credentialsSecret:
+      name: credentials
+    url: https://models.corp.redhat.com/oai/v1
+---
+apiVersion: agentic.openshift.io/v1alpha1
+kind: Agent
+metadata:
+  name: default
+spec:
+  llmProvider:
+    name: corp-vllm
+  model: Qwen3.8-27B-FP8
+  maxTurns: 200
+```

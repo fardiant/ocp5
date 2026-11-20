@@ -232,6 +232,8 @@ spec:
 ````
 
 # Agentic run
+https://docs.google.com/document/d/1MttXJTVXW3i1669huXz85oP3fwVZqHoTiKDh26Oxnww/edit?tab=t.4ynd6ezafmkh#heading=h.pmggbipqoft5
+
 ```
 TOKEN=$(oc get secret credentials -n openshift-lightspeed -o jsonpath='{.data.apitoken}' | base64 -d)
 oc patch secret credentials -n openshift-lightspeed --type=merge -p "{\"stringData\":{\"OPENAI_API_KEY\":\"${TOKEN}\"}}"
